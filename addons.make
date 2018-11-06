@@ -1,0 +1,4 @@
+ofxGui
+ofxPoco
+ofxTweener
+ofxXmlSettings
