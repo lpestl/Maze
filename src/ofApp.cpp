@@ -2,7 +2,12 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-
+	std::cout << "UINT max = " << std::numeric_limits<unsigned>::max() << std::endl;
+	std::cout << "ULONG max = " << std::numeric_limits<unsigned long long>::max() << std::endl;
+	auto outputSize = static_cast<unsigned long long>(std::numeric_limits<unsigned>::max()) * 2 + 1;
+	std::cout << "UINT * 2 + 1 = " << outputSize << std::endl;
+	bool isMoreless = outputSize <= std::numeric_limits<unsigned long long>::max();
+	std::cout << "UINT * 2 + 1 <= ULONG max ?  " << isMoreless << std::endl;
 }
 
 //--------------------------------------------------------------
