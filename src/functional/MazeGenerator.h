@@ -1,4 +1,6 @@
 #pragma once
+
+#include <iostream>
 #include <vector>
 #include <memory>
 #include <random>
@@ -64,7 +66,7 @@ public:
 		std::random_device rd;
 		std::mt19937 mt(rd());
 		// от 0 до 2 (2 не входит) и после привидени€ к int будет либо 0 - где стены нет, либо 1 - стену решили установить
-		uniform_int_distribution<int> dist(0, 2);
+		std::uniform_int_distribution<int> dist(0, 2);
 		// ќрганизуем цикл алгоритма Ёллера
 		for (unsigned i = 0; i < height; ++i)
 		{			

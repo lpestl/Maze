@@ -360,7 +360,7 @@ unsigned set = 1;
 std::random_device rd;
 std::mt19937 mt(rd());
 // от 0 до 2 (2 не входит) и после привидения к int будет либо 0 - где стены нет, либо 1 - стену решили установить
-uniform_int_distribution<int> dist(0, 2);
+std::uniform_int_distribution<int> dist(0, 2);
 // Организуем цикл алгоритма Эллера
 for (unsigned i = 0; i < height; ++i)
 {			
@@ -616,7 +616,310 @@ int main( ){
 
 > ![Окно генератора проектов](media/02.png)
 
+После открытия проекта в VisualStudio я добавил, уже написанный нами класс с генератором лабиринта, в папку `src/functional`. После я скомпилировал и запустил проект, чтобы проверить его работоспособность. Компиляция прошла без ошибок, я структура `Solution` выглядит следующим образом:
 
+> ![Solution structure](media/03.png)
+
+Создадим дополнительную папку и фильтр в проекте с именем `visualization`. Добавим туда новый класс для визуализации лабиринта. Назовем его, например, `Maze` и оформим его по правилам используемого нами фреймворка. Содержимое `Maze.h`:
+
+```C++
+// Maze.h
+#pragma once
+
+#include <vector>
+#include <memory>
+
+class Maze
+{
+public:
+	// метод для инициализации начальных занчений (аналог конструктора)
+	void setup();
+	// вызов метода происходит перед прорисовкой каждого кадра (предназначен для расчетов)
+	void update();
+	// метод для прорисовки кадра и отображения
+	void draw();
+
+	// метод, в котором мы будем просчитывать координаты и scale для лабиринта,
+	// чтобы на следующем кадре он был отображен корректно по центру экрана
+	void show_in_center();
+
+	// Обработчики для событий самого приложения
+	void windowResized(int w, int h);
+	void keyPressed(int key);
+	void keyReleased(int key);
+	void mouseDragged(int x, int y, int button);
+	void mousePressed(int x, int y, int button);
+	void mouseReleased(int x, int y, int button);
+	void mouseScrolled(int x, int y, float scrollX, float scrollY);
+
+private:
+	// Указатель на сгенерированный лабиринт
+	std::shared_ptr<std::vector<std::vector<char>>> maze_;
+	// Коэффициент увеличения для корректного отображения на экране
+	float scale_ = 0;
+	// Смещение всего лабиринта относительно левого верхнего угла экрана
+	int pos_x_ = 0;
+	int pos_y_ = 0;
+	// Последние значения позиции мыши 
+	// (понадобяться для того, чтобы в дальнейшем мы могли "двигать" мышкой лабиринт)
+	int last_mouse_pos_x_ = 0;
+	int last_mouse_pos_y_ = 0;
+};
+```
+
+В методе `setup()` инициализируем лабиринт с помощью ранее написанного генератора. Для этого добавим `#include "MazeGenerator.h"`. Так же для изначального отображения в центре экрана, после генерации лабиринта, вызовем метод `show_in_center()`, где подсчитаем масштаб и смещение лабиринта относительно текущего размера окна.
+
+```C++
+// Maze.cpp
+#include "Maze.h"
+#include "MazeGenerator.h"
+#include "ofMesh.h"
+
+void Maze::setup()
+{
+	// Если ранее лабиринт был уже создан
+	if (maze_ != nullptr)
+		// то сбрасываем счетчик указателя
+		maze_.reset();
+	// Генерируем новый лабиринт
+	maze_ = MazeGenerator::generate(10, 10);
+	// Нарисуем лабиринт в центре экрана
+	show_in_center();
+}
+
+void Maze::show_in_center()
+{
+	// Проверяем, создан ли лабиринт
+	if (maze_ == nullptr)
+		return;
+	// Получаем размеры окна
+	auto w = ofGetWindowWidth();
+	auto h = ofGetWindowHeight();
+	// считаем коэффициент соотношения размеров окна к размерам матрици по горизонтали и вертикали соответственно
+	auto k = static_cast<float>(w) / maze_.get()->at(0).size();
+	auto kh = static_cast<float>(h) / maze_.get()->size();
+	// выбираем коэффициент в зависимости от того, какое соотношение меньше
+	k = k < kh ? k : kh;
+	// Масштаб возьмем равный 75% от размера экрана, чтобы изображение было не до самых краев
+	scale_ = k * 0.75;
+	// И сместим к центру в зависимости от масштаба
+	pos_x_ = (w - maze_.get()->at(0).size() * scale_) / 2;
+	pos_y_ = (h - maze_.get()->size() * scale_) / 2;
+}
+```
+
+Для того чтобы нарисовать наш лабиринт, напишем в методе `draw()` логику отрисовки каждого кадра:
+
+```C++
+// Maze.cpp
+// ...
+void Maze::draw()
+{
+	// Проверяем, создан ли лабиринт
+	if (maze_ == nullptr)
+		return;
+	// Запомним изначальную матрицу трансформирования сцены
+	ofPushMatrix();
+	// Сделаем сдвиг на подсчитаное смещение
+	ofTranslate(pos_x_, pos_y_);
+	// Увеличим размер конечного изображения на подсчитанный заранее масштаб
+	ofScale(scale_, scale_);
+	// Зададим общий фон ячеек прозрачным серо-голубым цветом
+	ofSetHexColor(0x777777FF);
+	// Нарисуем фон в виде прямоугольника
+	ofDrawRectangle(0, 0, maze_.get()->at(0).size(), maze_.get()->size());
+	// Зададим черный цвет для стен
+	ofSetHexColor(0x000000);
+	// И пробещим по массивы с лабиринтом
+	for (size_t i = 0; i < maze_.get()->size(); ++i)
+		for (size_t j = 0; j < maze_.get()->at(0).size(); j++)
+			if (maze_.get()->at(i).at(j) == '#')
+				// Отрисовывая при этом стены
+				ofDrawRectangle(j, i, 1, 1);
+	// Вернем матрицу трансформирования сцены в изначальное состояние
+	ofPopMatrix();
+}
+// ...
+```
+
+Добавим небольшой интерактив для просмотра нашего лабиринта. Добавим перерисовку лабиринта при изменении размеров окна, добавим возможность скролла (приближения/удаления) к лабиринту, добавим возможность перемещать лабиринт мышкой.
+
+```C++
+// Maze.cpp
+// ...
+
+void Maze::windowResized(int w, int h)
+{
+	show_in_center();
+}
+
+void Maze::keyPressed(int key)
+{
+}
+
+void Maze::keyReleased(int key)
+{
+}
+
+void Maze::mouseDragged(int x, int y, int button)
+{
+	// При движении мыши с зажатой кнопкой, смещаем изображение на смещение мыши
+	pos_x_ -= last_mouse_pos_x_ - x;
+	pos_y_ -= last_mouse_pos_y_ - y;
+	// И снова запоминаем расположение мыши
+	mousePressed(x, y, button);
+}
+
+void Maze::mousePressed(int x, int y, int button)
+{
+	// Запоминаем расположение мыши при нажатии на кнопку
+	last_mouse_pos_x_ = x;
+	last_mouse_pos_y_ = y;
+}
+
+void Maze::mouseReleased(int x, int y, int button)
+{
+}
+
+void Maze::mouseScrolled(int x, int y, float scrollX, float scrollY)
+{
+	// Если скролл отрицательный и уменьшение масштаба будет меньше единицы
+	if ((scrollY < 0) && (scale_ * 0.9 <= 1.0))
+		// То ничего не делаем
+		return;
+	// Иначе считаем разницу между позицией мыши и смещением лабиринта и делим на масштаб, чтобы определить смещение без масштаба
+	auto deltaX = static_cast<double>(x - pos_x_) / scale_;
+	auto deltaY = static_cast<double>(y - pos_y_) / scale_;
+	// Масштаб увеличиваем в 10/9 в случае положительного скролла и в 0.9 в случае отрицательного
+	scale_ *= scrollY < 0 ? 0.9 : 10.0 / 9.0;
+	// Высчитываем смещение с новым масштабом
+	pos_x_ = x - deltaX * scale_;
+	pos_y_ = y - deltaY * scale_;
+}
+
+// ...
+```
+
+Теперь, чтобы это все скомпилировалось и запустилось, нам необходимо изменить класс `ofApp`, который и отвечает за отображение окна приложения. В `ofApp.h` мы добавим приватную переменную типа `Maze` и в `ofApp.cpp` пропишем обращение к ней во всех соответсвующих методах.
+
+```C++
+// ofApp.h
+#pragma once
+
+#include "ofMain.h"
+#include "visualization/Maze.h"
+
+class ofApp : public ofBaseApp{
+
+	public:
+		void setup();
+		void update();
+		void draw();
+
+		void keyPressed(int key);
+		void keyReleased(int key);
+		void mouseMoved(int x, int y );
+		void mouseDragged(int x, int y, int button);
+		void mousePressed(int x, int y, int button);
+		void mouseReleased(int x, int y, int button);
+		void mouseEntered(int x, int y);
+		void mouseExited(int x, int y);
+		void mouseScrolled(int x, int y, float scrollX, float scrollY);
+		void windowResized(int w, int h);
+		void dragEvent(ofDragInfo dragInfo);
+		void gotMessage(ofMessage msg);
+
+	private:
+		Maze maze_;
+};
+
+// ofApp.cpp
+#include "ofApp.h"
+#include "MazeGenerator.h"
+
+//--------------------------------------------------------------
+void ofApp::setup(){
+	maze_.setup();
+}
+
+//--------------------------------------------------------------
+void ofApp::update(){
+	maze_.update();
+}
+
+//--------------------------------------------------------------
+void ofApp::draw(){
+	// Изменим скучный серый фон на что-нибудь поинтересней
+	ofBackgroundGradient(ofColor::azure, ofColor::orange);
+	maze_.draw();
+}
+
+//--------------------------------------------------------------
+void ofApp::keyPressed(int key){
+	maze_.keyPressed(key);
+}
+
+//--------------------------------------------------------------
+void ofApp::keyReleased(int key){
+	maze_.keyReleased(key);
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseMoved(int x, int y ){
+
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseDragged(int x, int y, int button){
+	maze_.mouseDragged(x, y, button);
+}
+
+//--------------------------------------------------------------
+void ofApp::mousePressed(int x, int y, int button){
+	maze_.mousePressed(x, y, button);
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseReleased(int x, int y, int button){
+	maze_.mouseReleased(x, y, button);
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseEntered(int x, int y){
+
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseExited(int x, int y){
+
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
+	maze_.mouseScrolled(x, y, scrollX, scrollY);
+}
+
+//--------------------------------------------------------------
+void ofApp::windowResized(int w, int h){
+	maze_.windowResized(w, h);
+}
+
+//--------------------------------------------------------------
+void ofApp::gotMessage(ofMessage msg){
+
+}
+
+//--------------------------------------------------------------
+void ofApp::dragEvent(ofDragInfo dragInfo){ 
+
+}
+```
+
+Примерно следующую картинку мы получим при запуске приложения:
+
+> ![Первый запуск](media/04.png)
+
+Смотриться лабиринт гораздо симпатичней чем в консоли, не правда ли? ;)
 
 
 ## Используемая литература ##
