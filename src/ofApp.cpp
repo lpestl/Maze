@@ -1,8 +1,9 @@
 #include "ofApp.h"
+#include "MazeGenerator.h"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-
+	MazeGenerator::print(MazeGenerator::generate(5, 5));
 }
 
 //--------------------------------------------------------------
