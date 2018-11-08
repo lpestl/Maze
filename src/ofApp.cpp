@@ -1,4 +1,5 @@
 #include "ofApp.h"
+#include "MazeGenerator.h"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -8,6 +9,8 @@ void ofApp::setup(){
 	std::cout << "UINT * 2 + 1 = " << outputSize << std::endl;
 	bool isMoreless = outputSize <= std::numeric_limits<unsigned long long>::max();
 	std::cout << "UINT * 2 + 1 <= ULONG max ?  " << isMoreless << std::endl;
+
+	MazeGenerator::generate(5, 5);
 }
 
 //--------------------------------------------------------------
