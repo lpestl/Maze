@@ -10,7 +10,7 @@ void ofApp::setup(){
 	bool isMoreless = outputSize <= std::numeric_limits<unsigned long long>::max();
 	std::cout << "UINT * 2 + 1 <= ULONG max ?  " << isMoreless << std::endl;
 
-	MazeGenerator::generate(5, 5);
+	MazeGenerator::print(MazeGenerator::generate(5, 5));
 }
 
 //--------------------------------------------------------------

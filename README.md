@@ -441,13 +441,17 @@ for (unsigned j = 0; j < width; ++j)
 
 ```C++
 //*Важно : *Убедитесь, что каждая область имеет по крайней мере одну ячейку без нижней стены(это предотвратит создание изолированных областей)
-for (unsigned j = 0; j < width; ++j) {
-	unsigned count_hole = 0;
-	for (unsigned l = 0; l < width; ++l)
-		if ((row_set[l] == row_set[j]) && (maze.get()->at(i * 2 + 2).at(l * 2 + 1) == ' '))
-			count_hole++;
-	if (count_hole == 0)
-		maze.get()->at(i * 2 + 2).at(j * 2 + 1) = ' ';
+// Только если это не последняя строка
+if (i != height - 1)
+{
+	for (unsigned j = 0; j < width; ++j) {
+		unsigned count_hole = 0;
+		for (unsigned l = 0; l < width; ++l)
+			if ((row_set[l] == row_set[j]) && (maze.get()->at(i * 2 + 2).at(l * 2 + 1) == ' '))
+				count_hole++;
+		if (count_hole == 0)
+			maze.get()->at(i * 2 + 2).at(j * 2 + 1) = ' ';
+	}
 }
 ```
 
@@ -517,6 +521,79 @@ static std::shared_ptr<std::vector<std::vector<char>>> generate(unsigned width, 
 	return maze;
 }
 ```
+
+Завершение алгоритма будет выглядеть следующим образом:
+
+```C++
+//	5.Б Если вы решили закончить лабиринт :
+//		*добавьте нижнюю стену каждой ячейке
+/// Нижняя стена построена при инициализации лабиринта
+//		* перемещайтесь слева направо :
+for (unsigned int j = 0; j < width - 1; ++j)
+{
+	//			*Если текущая ячейка и ячейка справа являются членами разных множеств, то :
+	if (row_set[j] != row_set[j + 1])
+		//			*удалить правую стену
+		maze.get()->at(output_height - 2).at(j * 2 + 2) = ' ';
+	//			* объедините множества, к которым принадлежат текущая ячейка и ячейка справа
+		/// Это делать не обязательно, так как row_set мы больше не будем использовать,
+		/// а все множества в конечном итоге станут одним, после удаления стен
+	//			* вывод итоговой строки
+}
+```
+
+Теперь, чтобы проверить работоспособность алгоритма, можем добавить метод в этот же класс для вывода его в консоль. На вход метод будет принимать указатель на сгенерированный лабиринт и построчно выводить его в консоль:
+
+```C++
+#pragma once
+#include <vector>
+#include <memory>
+#include <random>
+
+class MazeGenerator
+{
+public:
+	static std::shared_ptr<std::vector<std::vector<char>>> generate(unsigned width, unsigned height)
+	{
+		// ... Алгоритм Эллера для генерации лабиринта ...
+	}
+
+	static void print(std::shared_ptr<std::vector<std::vector<char>>> maze)
+	{
+		// Проверяем указатель на nullptr
+		if (maze == nullptr)
+			return;
+
+		// Построчно считываем и выводим в консоль
+		for (unsigned i = 0; i < maze.get()->size(); ++i)
+		{
+			for (unsigned j = 0; j < maze.get()->at(0).size(); ++j)
+				std::cout << maze.get()->at(i).at(j);
+			std::cout << std::endl;
+		}
+	}
+
+private:
+	MazeGenerator() = default;
+};
+
+```
+
+И проверим как выглядит работоспособность алгоритма вызвав оба эти метода на примере лабиринта 10x5:
+
+```C++
+#include "MazeGenerator.h"
+
+//========================================================================
+int main( ){
+	MazeGenerator::print(MazeGenerator::generate(10, 5));
+	return 0;
+}
+
+```
+
+А в результате выполнения этой программы вы увидите примерно следующее:
+> ![Результат выполнения программы](media/01.png)
 
 
 
