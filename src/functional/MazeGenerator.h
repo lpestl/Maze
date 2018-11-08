@@ -154,7 +154,7 @@ public:
 		return maze;
 	}
 
-	static void print(std::shared_ptr<std::vector<std::vector<char>>> maze)
+	static void print(const std::shared_ptr<std::vector<std::vector<char>>>& maze)
 	{
 		// Проверяем указатель на nullptr
 		if (maze == nullptr)
@@ -168,6 +168,11 @@ public:
 			std::cout << std::endl;
 		}
 	}
+
+	//static void save_to_file(const std::shared_ptr<std::vector<std::vector<char>>>& maze)
+	//{
+	//	
+	//}
 
 private:
 	MazeGenerator() = default;
