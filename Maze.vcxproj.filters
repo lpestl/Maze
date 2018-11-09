@@ -67,6 +67,9 @@
     <ClCompile Include="src\visualization\Maze.cpp">
       <Filter>src\visualization</Filter>
     </ClCompile>
+    <ClCompile Include="src\functional\PathFinder.cpp">
+      <Filter>src\functional</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -169,6 +172,15 @@
     </ClInclude>
     <ClInclude Include="src\visualization\Maze.h">
       <Filter>src\visualization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functional\PathFinder.h">
+      <Filter>src\functional</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functional\Position2D.h">
+      <Filter>src\functional</Filter>
+    </ClInclude>
+    <ClInclude Include="src\functional\Direction2D.h">
+      <Filter>src\functional</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

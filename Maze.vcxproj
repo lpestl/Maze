@@ -184,6 +184,7 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\functional\PathFinder.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="..\..\openFrameworks\addons\ofxGui\src\ofxBaseGui.cpp" />
@@ -206,6 +207,9 @@
     <ClCompile Include="src\visualization\Maze.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\functional\Direction2D.h" />
+    <ClInclude Include="src\functional\PathFinder.h" />
+    <ClInclude Include="src\functional\Position2D.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\functional\MazeGenerator.h" />
     <ClInclude Include="..\..\openFrameworks\addons\ofxGui\src\ofxBaseGui.h" />
