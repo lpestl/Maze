@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include "ofPathFinder.h"
 
 class Maze
 {
@@ -17,7 +18,8 @@ public:
 	// метод, в котором мы будем просчитывать координаты и scale для лабиринта,
 	// чтобы на следующем кадре он был отображен корректно по центру экрана
 	void show_in_center();
-
+	// Метод для запуска игрока
+	void run() { player_.run(); }
 	// Обработчики для событий самого приложения
 	void windowResized(int w, int h);
 	void keyPressed(int key);
@@ -39,5 +41,7 @@ private:
 	// (понадобяться для того, чтобы в дальнейшем мы могли "двигать" мышкой лабиринт)
 	int last_mouse_pos_x_ = 0;
 	int last_mouse_pos_y_ = 0;
+	// Игрок
+	ofPathFinder player_;
 };
 

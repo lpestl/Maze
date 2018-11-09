@@ -15,7 +15,7 @@ public:
 	// ћетод дл€ инициализации игрока
 	void init(Position2D start_position, std::shared_ptr<std::vector<std::vector<char>>> maze);	
 	// ћетод дл€ следующего шага игрока
-	void nextStep();
+	virtual void nextStep();
 
 	// ћетод дл€ получени€ количества посещенных €чеек лабиринта
 	unsigned getCountVisitedCells() { return map_.size() + 1; }

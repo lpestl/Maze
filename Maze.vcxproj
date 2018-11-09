@@ -205,6 +205,7 @@
     <ClCompile Include="..\..\openFrameworks\addons\ofxXmlSettings\libs\tinyxmlerror.cpp" />
     <ClCompile Include="..\..\openFrameworks\addons\ofxXmlSettings\libs\tinyxmlparser.cpp" />
     <ClCompile Include="src\visualization\Maze.cpp" />
+    <ClCompile Include="src\visualization\ofPathFinder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\functional\Direction2D.h" />
@@ -229,6 +230,7 @@
     <ClInclude Include="..\..\openFrameworks\addons\ofxXmlSettings\src\ofxXmlSettings.h" />
     <ClInclude Include="..\..\openFrameworks\addons\ofxXmlSettings\libs\tinyxml.h" />
     <ClInclude Include="src\visualization\Maze.h" />
+    <ClInclude Include="src\visualization\ofPathFinder.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(OF_ROOT)\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">

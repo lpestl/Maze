@@ -15,6 +15,7 @@ class ofApp : public ofBaseApp{
 		void widthMazeChanged(int &width);
 		void heightMazeChanged(int &height);
 		void generateMazeButtonClick();
+		void runPlayerClick();
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -36,4 +37,5 @@ class ofApp : public ofBaseApp{
 		ofxIntSlider widthMaze_;
 		ofxIntSlider heightMaze_;
 		ofxButton generateMazeButton_;
+		ofxButton runPlayerButton_;
 };

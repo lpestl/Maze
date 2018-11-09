@@ -1381,7 +1381,264 @@ void PathFinder::nextStep()
 
 Но это не наглядно. Давайте реализуем визуализацию для нашего алгоритма.
 
+### 2.4 Визуализация алгоритма поиска кратчайшего пути на OF ###
 
+Теперь вспомним немного о возможностях наследования и создадим класс для визуализации алгоритма поиска пути и назовем его, например, `ofPathFinder`. Пусть он будет храниться в папке `visualization` и повторять структуру OF. А так же пусть он будет дочерним классом от уже написанного нами `PathFinder`. Мы добавим ему не только отрисовку, но еще и анимированное плавное перемещение из одной точки в другую. Для этого добавим приватную переменную-флаг, которая будет фиксировать состояние отрисовки, т.е. анимирован он в данный момент или нет и еще один callback метод, который будет срабатывать в конце анимации. Добавим метод `void run()`, для запуска, чтобы изначально он появлялся в начальной точке, а по команде - начинал свой путь. Так же нам понадобяться экранные координаты для отрисовки. Ведь, в родительском классе координаты позиции меняються моментально, а в процессе анимации экранные координаты будут меняться постепенно.
+
+```C++
+// ofPathFinder.h
+#pragma once
+
+#include "PathFinder.h"
+
+class ofPathFinder : public PathFinder
+{
+public:
+	void setup(Position2D start_position, std::shared_ptr<std::vector<std::vector<char>>> maze);
+	void update();
+	void draw();
+	void run();
+
+	void endAnimation(float *arg) { is_animated_ = false; }	// Callback функция, которая будет срабатывать, когда анимация заканчивается
+
+private:
+	bool is_animated_;	// Флаг для отслеживания состояния, находиться ли объект в процессе анимации (перемещения между ячейками)
+	bool is_runed_;		// Флаг для отображения, запущен игрок или нет (в процессе ли он поиска)
+	float screen_x_;	// Экранная координата X
+	float screen_y_;	// Экранная координата Y
+};
+
+```
+
+Для анимации мы ранее скачали и установили аддон `ofxTweener`. Сам аддон создает глобальную переменную `Tweener`, доступ к которой можно получить из любого места в проекте, просто подключив аддон с помощью диррективы `#include "ofxTweener.h"`. Чтобы он правильно пересчитывал все значения, на каждом тике `update` его надо обновлять, но только строго в одном месте, чтобы все анимации пересчитывались правильно. Можно добавить в файл `ofApp.cpp` следующие строки:
+
+```C++
+// ofApp.cpp
+#include "ofApp.h"
+#include "ofxTweener.h"		// аддон для анимаций
+
+// ...
+
+//--------------------------------------------------------------
+void ofApp::update(){
+	Tweener.update();	// обновление анимаций
+	maze_.update();
+}
+
+// ...
+```
+
+Так же в классе `ofPathFinder` нам необходимо переопределить метод `nextStep()`, а для этого в базовом классе добавим в определении метода `virtual void nextStep();` и в классе `ofPathFinder` в разделе public добавим строку `void nextStep() override;`. 
+
+Теперь реализуем методы для класса `ofPathFinder`. Надеюсь комментариев в коде будет достаточно.
+
+```C++
+// ofPathFinder.cpp
+#include "ofPathFinder.h"
+#include "ofxTweener.h"
+
+void ofPathFinder::setup(Position2D start_position, std::shared_ptr<std::vector<std::vector<char>>> maze)
+{
+	// При первоначальной инициализации удалим все ранее запущенные анимации
+	Tweener.removeAllTweens();
+	is_animated_ = false;
+	is_runed_ = false;
+	// Запустим инициализацию базового класса
+	init(start_position, maze);
+	// Инициализируем начальные экранные координаты
+	screen_x_ = current_position_.X;
+	screen_y_ = current_position_.Y;
+}
+
+void ofPathFinder::update()
+{
+	// Если не запущен - то ничего не делаем
+	if (!is_runed_) return;
+	// Если запущен и уже добрался до конца - ничего не делаем
+	if (is_win_) return;
+	// Если еще не добрался до выхода, запущен и анимирован, то делаем следующий шаг
+	if (!is_animated_)
+		nextStep();
+}
+
+void ofPathFinder::draw()
+{
+	// Проверяем лабиринт
+	if (maze_ == nullptr) return;	
+	// Сначала серым закрасим все посещенные ранее ячейки
+	ofSetHexColor(0x33555555);
+	for (auto& pos : map_)
+		ofDrawRectangle(pos.first.X, pos.first.Y, 1, 1);
+	// Теперь зеленым отметим кратчайший путь
+	ofSetHexColor(0x5500FF00);
+	for (auto& pos : short_way_)
+		ofDrawRectangle(pos.X, pos.Y, 1, 1);
+	// И красным нарисуем самого "игрока"
+	ofSetHexColor(0x77FF0000);
+	ofDrawRectangle(screen_x_, screen_y_, 1, 1);
+}
+
+void ofPathFinder::run()
+{
+	// Запускаем игрока
+	is_runed_ = true;
+}
+
+void ofPathFinder::nextStep()
+{
+	// Запоминаем текущие координты игрока
+	screen_x_ = current_position_.X;
+	screen_y_ = current_position_.Y;
+	// Создаем callback, который будет вызываться при окончании анимации
+	auto callback = std::bind(&ofPathFinder::endAnimation, this, std::placeholders::_1);
+	// Вызывем базовый метод для выполнения следующего шага
+	PathFinder::nextStep();
+	// И анимируем перемещение игрока
+	if (is_win_)
+	{
+		Tweener.addTween(screen_x_, static_cast<float>(current_position_.X), /* Длительность анимации */0.1F, &ofxTransitions::linear);
+		Tweener.addTween(screen_y_, static_cast<float>(current_position_.Y), /* Длительность анимации */0.1F, &ofxTransitions::linear);
+	} else
+	{
+		Tweener.addTween(screen_x_, static_cast<float>(current_position_.X), /* Длительность анимации */0.1F, &ofxTransitions::linear, callback);
+		Tweener.addTween(screen_y_, static_cast<float>(current_position_.Y), /* Длительность анимации */0.1F, &ofxTransitions::linear, callback);
+	}
+}
+
+```
+
+Основной функционал прописан для визуализации, осталось только добавить его вызовы в класс `Maze`. Первым делом удалите часть кода из метода `setup()`, которая проверяла базовый класс `PathFinder` и выводила в консоль результат. В `Maze.h` добавьте объявление закрытой переменной класса `ofPathFinder` и добавьте публичный метод для запуска `void run()`.
+
+```C++
+// Maze.h
+#pragma once
+
+#include <vector>
+#include <memory>
+#include "ofPathFinder.h"
+
+class Maze
+{
+public:
+    // ...
+	// Метод для запуска игрока
+	void run() { player_.run(); }
+	// ...
+private:
+	// ...
+	// Игрок
+	ofPathFinder player_;
+};
+```
+
+В методах `setup`, `update` и `draw` в файле `Maze.cpp` так же необходимо внести изменения. А именно, в `setup` вызвать инициализацию игрока, в `update` - его обновление и в `draw` - нарисовать игрока и, в случае если он добрался до точки выхода, вывести информацию на экран.
+
+```C++
+// Maze.cpp
+#include "Maze.h"
+#include "MazeGenerator.h"
+#include "ofMesh.h"
+#include "ofBitmapFont.h"
+
+void Maze::setup(int width, int height)
+{
+	// ...
+
+	// Добавим в лабиринт "точку выхода" в правый нижний угол учитывая наличие стен
+	maze_.get()->at(maze_.get()->size() - 2).at(maze_.get()->at(0).size() - 2) = 'X';
+	
+	// Инициализация игрока
+	player_.setup(Position2D{ 1, 1 }, maze_);
+
+	// Нарисуем лабиринт в центре экрана
+	show_in_center();
+}
+
+void Maze::update()
+{
+	// Обновление 
+	player_.update();
+}
+
+void Maze::draw()
+{
+	// ...
+
+	// Отрисовка игрока (причем она должна быть до того как мы вызовем ofPopMatrix)
+	player_.draw();
+
+	// Вернем матрицу трансформирования сцены в изначальное состояние
+	ofPopMatrix();
+
+	// А сообщение о конце пути, выводим после ofPopMatrix
+	if (player_.isWin())
+	{
+		std::stringstream reportStr;
+		reportStr << "Short way FOUNDED! Need " << player_.getShortWayLenght() << " steps";
+		ofDrawBitmapStringHighlight(reportStr.str(), 100, ofGetWindowHeight() - 100, ofColor::orangeRed, ofColor::black);
+	}
+}
+// ...
+```
+
+Теперь только нехватает кнопки, чтобы запустить игрока. Для этого в `ofApp.h` добавим еще одну кнопу `ofxButton runPlayerButton_;` и метод для обработки события клика по этой кнопке `void runPlayerClick();`. А в файле `ofApp.cpp` в методе `setup` добавим обработчик события для этой кнопки и добавим её на панель. В методе `exit` отпишемся от этого события. А в методе `runPlayerClick` пропишем вызов запуска поиска пути.
+
+```C++
+// ofApp.h
+#pragma once
+
+#include // ..
+
+class ofApp : public ofBaseApp{
+
+	public:
+		// ...
+		void runPlayerClick();
+		// ...
+	private:
+		// ...
+		ofxButton runPlayerButton_;
+};
+
+// ofApp.cpp
+#include "ofApp.h"
+#include "ofxTweener.h"		// аддон для анимаций
+
+//--------------------------------------------------------------
+void ofApp::setup(){
+	// Подписываемся на события элементов управления
+	widthMaze_.addListener(this, &ofApp::widthMazeChanged);
+	heightMaze_.addListener(this, &ofApp::heightMazeChanged);
+	generateMazeButton_.addListener(this, &ofApp::generateMazeButtonClick);
+	runPlayerButton_.addListener(this, &ofApp::runPlayerClick);
+	// Вызываем метод setup у панели
+	mazeUiPanel_.setup();
+	// И последовательно добавляем все элементы управления
+	mazeUiPanel_.add(widthMaze_.setup("Width Maze", 3, 2, 100));
+	mazeUiPanel_.add(heightMaze_.setup("Height Maze", 3, 2, 100));
+	mazeUiPanel_.add(generateMazeButton_.setup("Generate Maze"));
+	mazeUiPanel_.add(runPlayerButton_.setup("Find short way"));
+}
+// ...
+void ofApp::exit()
+{
+	// Отписываемся от событий
+	heightMaze_.removeListener(this, &ofApp::heightMazeChanged);
+	widthMaze_.removeListener(this, &ofApp::widthMazeChanged);
+	generateMazeButton_.removeListener(this, &ofApp::generateMazeButtonClick);
+	runPlayerButton_.removeListener(this, &ofApp::runPlayerClick);
+}
+// ...
+void ofApp::runPlayerClick()
+{
+	maze_.run();
+}
+// ...
+```
+
+И теперь визуализация полностью готова. Если вы скомпилируете и запустите приложение, то увидите примерно следующую картину:
+
+> ![Maze path finder](media/08.gif)
 
 ## Используемая литература ##
 

@@ -70,6 +70,9 @@
     <ClCompile Include="src\functional\PathFinder.cpp">
       <Filter>src\functional</Filter>
     </ClCompile>
+    <ClCompile Include="src\visualization\ofPathFinder.cpp">
+      <Filter>src\visualization</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -181,6 +184,9 @@
     </ClInclude>
     <ClInclude Include="src\functional\Direction2D.h">
       <Filter>src\functional</Filter>
+    </ClInclude>
+    <ClInclude Include="src\visualization\ofPathFinder.h">
+      <Filter>src\visualization</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

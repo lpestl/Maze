@@ -1,4 +1,5 @@
 #include "ofApp.h"
+#include "ofxTweener.h"		// аддон для анимаций
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -6,16 +7,19 @@ void ofApp::setup(){
 	widthMaze_.addListener(this, &ofApp::widthMazeChanged);
 	heightMaze_.addListener(this, &ofApp::heightMazeChanged);
 	generateMazeButton_.addListener(this, &ofApp::generateMazeButtonClick);
+	runPlayerButton_.addListener(this, &ofApp::runPlayerClick);
 	// Вызываем метод setup у панели
 	mazeUiPanel_.setup();
 	// И последовательно добавляем все элементы управления
 	mazeUiPanel_.add(widthMaze_.setup("Width Maze", 3, 2, 100));
 	mazeUiPanel_.add(heightMaze_.setup("Height Maze", 3, 2, 100));
 	mazeUiPanel_.add(generateMazeButton_.setup("Generate Maze"));
+	mazeUiPanel_.add(runPlayerButton_.setup("Find short way"));
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+	Tweener.update();	// обновление анимаций
 	maze_.update();
 }
 
@@ -32,6 +36,7 @@ void ofApp::exit()
 	heightMaze_.removeListener(this, &ofApp::heightMazeChanged);
 	widthMaze_.removeListener(this, &ofApp::widthMazeChanged);
 	generateMazeButton_.removeListener(this, &ofApp::generateMazeButtonClick);
+	runPlayerButton_.removeListener(this, &ofApp::runPlayerClick);
 }
 
 void ofApp::widthMazeChanged(int& width)
@@ -45,6 +50,11 @@ void ofApp::heightMazeChanged(int& height)
 void ofApp::generateMazeButtonClick()
 {
 	maze_.setup(widthMaze_, heightMaze_);
+}
+
+void ofApp::runPlayerClick()
+{
+	maze_.run();
 }
 
 //--------------------------------------------------------------

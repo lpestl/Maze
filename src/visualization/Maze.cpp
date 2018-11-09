@@ -3,8 +3,6 @@
 #include "ofMesh.h"
 #include "ofBitmapFont.h"
 
-#include "PathFinder.h"
-
 void Maze::setup(int width, int height)
 {
 	// Если ранее лабиринт был уже создан
@@ -16,19 +14,9 @@ void Maze::setup(int width, int height)
 
 	// Добавим в лабиринт "точку выхода" в правый нижний угол учитывая наличие стен
 	maze_.get()->at(maze_.get()->size() - 2).at(maze_.get()->at(0).size() - 2) = 'X';
-
-	// Создадим "игрока", который будет искать точку выхода
-	PathFinder player;
-	// Зададим точку входа в левом верхнем углу лабиринта с учетом стен и передадим ему информацию о сгенерированном лабиринте
-	player.init(Position2D{ 1, 1 }, maze_);
-	// До тех пор пока игрок не достигнет цели
-	while (!player.isWin())
-		// игрок будет совершать шаги
-		player.nextStep();
-	// Выведем в консоль количество совершенных шагов
-	std::cout << "Count visited cells: " << player.getCountVisitedCells() << std::endl;
-	// И длинну кратчайшего пути
-	std::cout << "Short way lenght: " << player.getShortWayLenght() << std::endl;
+	
+	// Инициализация игрока
+	player_.setup(Position2D{ 1, 1 }, maze_);
 
 	// Нарисуем лабиринт в центре экрана
 	show_in_center();
@@ -36,6 +24,8 @@ void Maze::setup(int width, int height)
 
 void Maze::update()
 {
+	// Обновление 
+	player_.update();
 }
 
 void Maze::draw()
@@ -70,8 +60,19 @@ void Maze::draw()
 		ofDrawRectRounded(maze_.get()->at(0).size() - 2, maze_.get()->size() - 2, 1, 1, 0.3);
 	}
 
+	// Отрисовка игрока (причем она должна быть до того как мы вызовем ofPopMatrix)
+	player_.draw();
+
 	// Вернем матрицу трансформирования сцены в изначальное состояние
 	ofPopMatrix();
+
+	// А сообщение о конце пути, выводим после ofPopMatrix
+	if (player_.isWin())
+	{
+		std::stringstream reportStr;
+		reportStr << "Short way FOUNDED! Need " << player_.getShortWayLenght() << " steps";
+		ofDrawBitmapStringHighlight(reportStr.str(), 100, ofGetWindowHeight() - 100, ofColor::orangeRed, ofColor::black);
+	}
 }
 
 void Maze::show_in_center()
