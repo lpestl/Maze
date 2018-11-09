@@ -3,6 +3,8 @@
 #include "ofMesh.h"
 #include "ofBitmapFont.h"
 
+#include "PathFinder.h"
+
 void Maze::setup(int width, int height)
 {
 	// Если ранее лабиринт был уже создан
@@ -11,6 +13,23 @@ void Maze::setup(int width, int height)
 		maze_.reset();
 	// Генерируем новый лабиринт
 	maze_ = MazeGenerator::generate(width, height);
+
+	// Добавим в лабиринт "точку выхода" в правый нижний угол учитывая наличие стен
+	maze_.get()->at(maze_.get()->size() - 2).at(maze_.get()->at(0).size() - 2) = 'X';
+
+	// Создадим "игрока", который будет искать точку выхода
+	PathFinder player;
+	// Зададим точку входа в левом верхнем углу лабиринта с учетом стен и передадим ему информацию о сгенерированном лабиринте
+	player.init(Position2D{ 1, 1 }, maze_);
+	// До тех пор пока игрок не достигнет цели
+	while (!player.isWin())
+		// игрок будет совершать шаги
+		player.nextStep();
+	// Выведем в консоль количество совершенных шагов
+	std::cout << "Count visited cells: " << player.getCountVisitedCells() << std::endl;
+	// И длинну кратчайшего пути
+	std::cout << "Short way lenght: " << player.getShortWayLenght() << std::endl;
+
 	// Нарисуем лабиринт в центре экрана
 	show_in_center();
 }
@@ -42,6 +61,15 @@ void Maze::draw()
 			if (maze_.get()->at(i).at(j) == '#')
 				// Отрисовывая при этом стены
 				ofDrawRectangle(j, i, 1, 1);
+	// Проверим точку выхода
+	if (maze_.get()->at(maze_.get()->size() - 2).at(maze_.get()->at(0).size() - 2) == 'X')
+	{
+		// Зададим Зеленый цвет
+		ofSetHexColor(0xFF00FF00);
+		// Нарисуем точку выхода
+		ofDrawRectRounded(maze_.get()->at(0).size() - 2, maze_.get()->size() - 2, 1, 1, 0.3);
+	}
+
 	// Вернем матрицу трансформирования сцены в изначальное состояние
 	ofPopMatrix();
 }
