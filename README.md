@@ -921,6 +921,181 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 Смотриться лабиринт гораздо симпатичней чем в консоли, не правда ли? ;)
 
+А примерно так выглядит приближенное начало сгенерированного лабиринта размером 1000x1000:
+
+>![1000x1000](media/05.png)
+
+Теперь, чтобы лабиринт мы могли генерировать любого размера, давайте вынесем настройки ширины и длинны в пользовательский интерфейс. Чтобы не проделывать огромную работу по созданию своего UI, воспользуемся доступным нам аддоном `ofxGui`. Для этого необходимо подключить в заголовке файла `ofApp.h` доступный файл `ofxGui.h` и добавить к приватным переменным UI панель, на которой будут располагаться элементы управления, два слайдера, для задания ширины и длинны, и кнопку для генерации лабиринта. A так же нам необходимо добавить три метода, для обработки событий с элементов управления слайдерами и кнопки. Выглядеть это будет следующим образом:
+
+```C++
+// ofApp.h
+#pragma once
+
+#include "ofMain.h"
+#include "visualization/Maze.h"
+#include "ofxGui.h"
+
+class ofApp : public ofBaseApp {
+	// ... Some methodts
+		void widthMazeChanged(int &width);
+		void heightMazeChanged(int &height);
+		void generateMazeButtonClick();		
+		// и еще необходим стандартный метод exit, который вызывается при закрытии окна,
+		// чтобы мы имели возможность отписаться от событий с элементов управления
+		void exit();
+
+	private:
+		Maze maze_;
+
+		ofxPanel mazeUiPanel_;
+		ofxIntSlider widthMaze_;
+		ofxIntSlider heightMaze_;
+		ofxButton generateMazeButton_;
+};
+
+```
+
+В файле `ofApp.cpp` в методе `setup()` необходимо инициализировать элементы управления и добавить их на панель. В методе `draw()` нам необходимо отрисовать саму панель, а она уже отрисует все добавленные элементы управления. Причем, если мы хотим, чтобы панель была поверх всего, то и вызывать метод `draw()` у панели надо в последнюю очередь. В методе `exit()` мы отписываемся от событий. А в обработчике клика по кнопке, необходимо вызвать метод инициализации для нашего лабиринта с установленными на слайдерах значениями.
+
+```C++
+// ofApp.cpp
+#include "ofApp.h"
+
+//--------------------------------------------------------------
+void ofApp::setup(){
+	// Подписываемся на события элементов управления
+	widthMaze_.addListener(this, &ofApp::widthMazeChanged);
+	heightMaze_.addListener(this, &ofApp::heightMazeChanged);
+	generateMazeButton_.addListener(this, &ofApp::generateMazeButtonClick);
+	// Вызываем метод setup у панели
+	mazeUiPanel_.setup();
+	// И последовательно добавляем все элементы управления
+	mazeUiPanel_.add(
+		widthMaze_.setup("Width Maze" /* Подпись */,
+			3/* Значение при старте */, 
+			2 /* минимальное значение */, 
+			100 /* максимальное значение */)
+		);
+	mazeUiPanel_.add(
+		heightMaze_.setup("Height Maze" /* Подпись */, 
+			3/* Значение при старте */, 
+			2 /* минимальное значение */, 
+			100 /* максимальное значение */)
+		);
+	mazeUiPanel_.add(generateMazeButton_.setup("Generate Maze" /* подпись */));
+
+	maze_.setup();
+}
+
+//--------------------------------------------------------------
+void ofApp::update(){
+	maze_.update();
+}
+
+//--------------------------------------------------------------
+void ofApp::draw(){
+	ofBackgroundGradient(ofColor::azure, ofColor::orange);
+	maze_.draw();
+
+	// Рисуем панель поверх всего
+	mazeUiPanel_.draw();
+}
+
+void ofApp::exit()
+{
+	// Отписываемся от событий
+	heightMaze_.removeListener(this, &ofApp::heightMazeChanged);
+	widthMaze_.removeListener(this, &ofApp::widthMazeChanged);
+	generateMazeButton_.removeListener(this, &ofApp::generateMazeButtonClick);
+}
+
+void ofApp::widthMazeChanged(int& width)
+{
+}
+
+void ofApp::heightMazeChanged(int& height)
+{
+}
+
+void ofApp::generateMazeButtonClick()
+{
+	// Вызываем событи инициализации для лабиринта
+	maze_.setup(widthMaze_, heightMaze_);
+}
+```
+
+Но так как у нашего, написанного ранее класса `Maze`, метод `setup()` не принимает никаких параметров, то нам необходимо их добавить:
+
+```C++
+// Maze.h
+#pragma once
+
+#include <vector>
+#include <memory>
+
+class Maze
+{
+public:
+	// метод для инициализации начальных занчений (аналог конструктора)
+	void setup(int width, int height);
+	// ...
+}
+
+// Maze.cpp
+#include "Maze.h"
+#include "MazeGenerator.h"
+#include "ofMesh.h"
+#include "ofBitmapFont.h"
+
+void Maze::setup(int width, int height)
+{
+	// Если ранее лабиринт был уже создан
+	if (maze_ != nullptr)
+		// то сбрасываем счетчик указателя
+		maze_.reset();
+	// Генерируем новый лабиринт
+	maze_ = MazeGenerator::generate(10, 10);
+	// Нарисуем лабиринт в центре экрана
+	show_in_center();
+}
+
+// ofApp.cpp
+// Ну и в методе ofApp::setup уберем первоначальную инициализацию для лабиринта,
+// чтобы он генерировался не при старте приложения, а только по клику кнопки.
+#include "ofApp.h"
+
+//--------------------------------------------------------------
+void ofApp::setup(){
+	// Подписываемся на события элементов управления
+	widthMaze_.addListener(this, &ofApp::widthMazeChanged);
+	heightMaze_.addListener(this, &ofApp::heightMazeChanged);
+	generateMazeButton_.addListener(this, &ofApp::generateMazeButtonClick);
+	// Вызываем метод setup у панели
+	mazeUiPanel_.setup();
+	// И последовательно добавляем все элементы управления
+	mazeUiPanel_.add(
+		widthMaze_.setup("Width Maze" /* Подпись */,
+			3/* Значение при старте */, 
+			2 /* минимальное значение */, 
+			100 /* максимальное значение */)
+		);
+	mazeUiPanel_.add(
+		heightMaze_.setup("Height Maze" /* Подпись */, 
+			3/* Значение при старте */, 
+			2 /* минимальное значение */, 
+			100 /* максимальное значение */)
+		);
+	mazeUiPanel_.add(generateMazeButton_.setup("Generate Maze" /* подпись */));
+
+	//maze_.setup();
+}
+```
+
+Теперь при запуске приложения мы можем выбирать размеры лабиринта в пределах от 2 до 100 включительно и генерировать его по клику кнопки.
+
+>![Simple UI](media/06.png)
+
+
 
 ## Используемая литература ##
 

@@ -1,9 +1,17 @@
 #include "ofApp.h"
-#include "MazeGenerator.h"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	maze_.setup();
+	// Подписываемся на события элементов управления
+	widthMaze_.addListener(this, &ofApp::widthMazeChanged);
+	heightMaze_.addListener(this, &ofApp::heightMazeChanged);
+	generateMazeButton_.addListener(this, &ofApp::generateMazeButtonClick);
+	// Вызываем метод setup у панели
+	mazeUiPanel_.setup();
+	// И последовательно добавляем все элементы управления
+	mazeUiPanel_.add(widthMaze_.setup("Width Maze", 3, 2, 100));
+	mazeUiPanel_.add(heightMaze_.setup("Height Maze", 3, 2, 100));
+	mazeUiPanel_.add(generateMazeButton_.setup("Generate Maze"));
 }
 
 //--------------------------------------------------------------
@@ -15,6 +23,28 @@ void ofApp::update(){
 void ofApp::draw(){
 	ofBackgroundGradient(ofColor::azure, ofColor::orange);
 	maze_.draw();
+	mazeUiPanel_.draw();
+}
+
+void ofApp::exit()
+{
+	// Отписываемся от событий
+	heightMaze_.removeListener(this, &ofApp::heightMazeChanged);
+	widthMaze_.removeListener(this, &ofApp::widthMazeChanged);
+	generateMazeButton_.removeListener(this, &ofApp::generateMazeButtonClick);
+}
+
+void ofApp::widthMazeChanged(int& width)
+{
+}
+
+void ofApp::heightMazeChanged(int& height)
+{
+}
+
+void ofApp::generateMazeButtonClick()
+{
+	maze_.setup(widthMaze_, heightMaze_);
 }
 
 //--------------------------------------------------------------

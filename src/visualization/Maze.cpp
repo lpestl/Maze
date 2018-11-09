@@ -3,14 +3,14 @@
 #include "ofMesh.h"
 #include "ofBitmapFont.h"
 
-void Maze::setup()
+void Maze::setup(int width, int height)
 {
 	// Если ранее лабиринт был уже создан
 	if (maze_ != nullptr)
 		// то сбрасываем счетчик указателя
 		maze_.reset();
 	// Генерируем новый лабиринт
-	maze_ = MazeGenerator::generate(10, 10);
+	maze_ = MazeGenerator::generate(width, height);
 	// Нарисуем лабиринт в центре экрана
 	show_in_center();
 }

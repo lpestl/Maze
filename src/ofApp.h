@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "visualization/Maze.h"
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp{
 
@@ -9,6 +10,11 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
+		void exit();
+
+		void widthMazeChanged(int &width);
+		void heightMazeChanged(int &height);
+		void generateMazeButtonClick();
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -25,4 +31,9 @@ class ofApp : public ofBaseApp{
 
 	private:
 		Maze maze_;
+
+		ofxPanel mazeUiPanel_;
+		ofxIntSlider widthMaze_;
+		ofxIntSlider heightMaze_;
+		ofxButton generateMazeButton_;
 };
