@@ -799,7 +799,7 @@ void Maze::mouseScrolled(int x, int y, float scrollX, float scrollY)
 // ...
 ```
 
-Теперь, чтобы это все скомпилировалось и запустилось, нам необходимо изменить класс `ofApp`, который и отвечает за отображение окна приложения. В `ofApp.h` мы добавим приватную переменную типа `Maze` и в `ofApp.cpp` пропишем обращение к ней во всех соответсвующих методах.
+Теперь, чтобы это все скомпилировалось и запустилось, нам необходимо изменить класс `ofApp`, который и отвечает за отображение окна приложения. В `ofApp.h` мы добавим приватную переменную типа `Maze` и в `ofApp.cpp` пропишем обращение к ней во всех соответствующих методах.
 
 ```C++
 // ofApp.h
@@ -810,26 +810,26 @@ void Maze::mouseScrolled(int x, int y, float scrollX, float scrollY)
 
 class ofApp : public ofBaseApp{
 
-	public:
-		void setup();
-		void update();
-		void draw();
+    public:
+        void setup();
+        void update();
+        void draw();
 
-		void keyPressed(int key);
-		void keyReleased(int key);
-		void mouseMoved(int x, int y );
-		void mouseDragged(int x, int y, int button);
-		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
-		void mouseEntered(int x, int y);
-		void mouseExited(int x, int y);
-		void mouseScrolled(int x, int y, float scrollX, float scrollY);
-		void windowResized(int w, int h);
-		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
+        void keyPressed(int key);
+        void keyReleased(int key);
+        void mouseMoved(int x, int y );
+        void mouseDragged(int x, int y, int button);
+        void mousePressed(int x, int y, int button);
+        void mouseReleased(int x, int y, int button);
+        void mouseEntered(int x, int y);
+        void mouseExited(int x, int y);
+        void mouseScrolled(int x, int y, float scrollX, float scrollY);
+        void windowResized(int w, int h);
+        void dragEvent(ofDragInfo dragInfo);
+        void gotMessage(ofMessage msg);
 
-	private:
-		Maze maze_;
+    private:
+        Maze maze_;
 };
 
 // ofApp.cpp
@@ -838,29 +838,29 @@ class ofApp : public ofBaseApp{
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	maze_.setup();
+    maze_.setup();
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	maze_.update();
+    maze_.update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	// Изменим скучный серый фон на что-нибудь поинтересней
-	ofBackgroundGradient(ofColor::azure, ofColor::orange);
-	maze_.draw();
+    // Изменим скучный серый фон на что-нибудь поинтересней
+    ofBackgroundGradient(ofColor::azure, ofColor::orange);
+    maze_.draw();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-	maze_.keyPressed(key);
+    maze_.keyPressed(key);
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-	maze_.keyReleased(key);
+    maze_.keyReleased(key);
 }
 
 //--------------------------------------------------------------
@@ -870,17 +870,17 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-	maze_.mouseDragged(x, y, button);
+    maze_.mouseDragged(x, y, button);
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-	maze_.mousePressed(x, y, button);
+    maze_.mousePressed(x, y, button);
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-	maze_.mouseReleased(x, y, button);
+    maze_.mouseReleased(x, y, button);
 }
 
 //--------------------------------------------------------------
@@ -895,12 +895,12 @@ void ofApp::mouseExited(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
-	maze_.mouseScrolled(x, y, scrollX, scrollY);
+    maze_.mouseScrolled(x, y, scrollX, scrollY);
 }
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-	maze_.windowResized(w, h);
+    maze_.windowResized(w, h);
 }
 
 //--------------------------------------------------------------
@@ -918,7 +918,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 > ![Первый запуск](media/04.png)
 
-Смотриться лабиринт гораздо симпатичней чем в консоли, не правда ли? ;)
+Смотрится лабиринт гораздо симпатичней чем в консоли, не правда ли? ;)
 
 А примерно так выглядит приближенное начало сгенерированного лабиринта размером 1000x1000:
 
@@ -1098,7 +1098,7 @@ void ofApp::setup(){
 
 Для понимания некоторых моментов, советую ознакомиться со статьей Джирла Уолкера ["Как пройти через лабиринт не заблудившись"](http://ega-math.narod.ru/Nquant/Maze.htm). Описанных в этой статье основ достаточно, чтобы придумать и понять суть этого не сложного алгоритма.
 
-Самое главное что нужно знать, что в односвязном лабиринте к точке выхода ведет всегда только один путь. Еще один момент, который нужно учитывать, что добраться до выхода можно используя "Правило руки":
+Самое главное, что нужно знать, что в односвязном лабиринте к точке выхода ведет всегда только один путь. Еще один момент, который нужно учитывать, что добраться до выхода можно используя "Правило руки":
 
 > ...Один из методов состоит в том, чтобы в каждой узловой точке выбирать одно и то же направление. Например, можно всегда сворачивать на крайнюю правую ветвь. Если этот путь закончится тупиком, следует вернуться к узловой точке и выбрать следующую ветвь (если считать справа). Может оказаться, что в результате вы пройдете по каждой ветви дважды — по одному разу в каждом направлении, но в конце концов вы доберётесь до цели. На обратном пути можно либо продолжать выбирать крайние правые ветви в каждом узле (и в этом случае вы, вероятно, пройдёте по новым областям лабиринта), либо каждый раз сворачивать на крайнюю левую ветвь (и тогда вы в точности повторите первоначальный маршрут). Метод выбора одной и той же — правой или левой — ветви я называю соответственно правилом правой или левой руки... [[2]](http://ega-math.narod.ru/Nquant/Maze.htm)
 
@@ -1106,7 +1106,7 @@ void ofApp::setup(){
 
 Для описания алгоритма введем такие абстрактные понятия как `игрок`, `точка входа` и `точка выхода`.
 
-`Игрок` - это некоторая сущность, которая будет передвигаться по лабиринту от точки входа до точки выхода. Игрок будет иметь свои координаты нахождения в лабиринте и свое направление движения. Так же, для поиска кратчайшего пути, игроку потребуется какая-то история его передвижений, чтобы опредилять, был он уже в этой точке лабиринта, или не был.
+`Игрок` - это некоторая сущность, которая будет передвигаться по лабиринту от точки входа до точки выхода. Игрок будет иметь свои координаты нахождения в лабиринте и свое направление движения. Так же, для поиска кратчайшего пути, игроку потребуется какая-то история его передвижений, чтобы определять, был он уже в этой точке лабиринта, или не был.
 
 `Точка входа` - позиция в лабиринте, с которой начинает свое движение игрок.
 
