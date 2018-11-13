@@ -20,6 +20,10 @@ public:
 	void show_in_center();
 	// Метод для запуска игрока
 	void run() { player_.run(); }
+	// Изменить прозрачность
+	void setTransparency(int new_alpha, float delay = 0.0);
+	void setAlpha(float new_alpha);
+
 	// Обработчики для событий самого приложения
 	void windowResized(int w, int h);
 	void keyPressed(int key);
@@ -28,7 +32,6 @@ public:
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
 	void mouseScrolled(int x, int y, float scrollX, float scrollY);
-
 private:
 	// Указатель на сгенерированный лабиринт
 	std::shared_ptr<std::vector<std::vector<char>>> maze_;
@@ -43,5 +46,7 @@ private:
 	int last_mouse_pos_y_ = 0;
 	// Игрок
 	ofPathFinder player_;
+	// Прозрачность
+	float alpha_;
 };
 

@@ -2,9 +2,12 @@
 #include "MazeGenerator.h"
 #include "ofMesh.h"
 #include "ofBitmapFont.h"
+#include "ofxTweener.h"
 
 void Maze::setup(int width, int height)
 {
+	alpha_ = 0.0f;
+
 	// Если ранее лабиринт был уже создан
 	if (maze_ != nullptr)
 		// то сбрасываем счетчик указателя
@@ -40,11 +43,13 @@ void Maze::draw()
 	// Увеличим размер конечного изображения на подсчитанный заранее масштаб
 	ofScale(scale_, scale_);
 	// Зададим общий фон ячеек прозрачным серо-голубым цветом
-	ofSetHexColor(0x777777FF);
+	//ofSetHexColor(0x777777FF);
+	ofSetColor(128, 128, 255, alpha_ / 2);
 	// Нарисуем фон в виде прямоугольника
 	ofDrawRectangle(0, 0, maze_.get()->at(0).size(), maze_.get()->size());
 	// Зададим черный цвет для стен
-	ofSetHexColor(0x000000);
+	//ofSetHexColor(0x000000);
+	ofSetColor(0, 0, 0, alpha_);
 	// И пробещим по массивы с лабиринтом
 	for (size_t i = 0; i < maze_.get()->size(); ++i)
 		for (size_t j = 0; j < maze_.get()->at(0).size(); j++)
@@ -55,7 +60,8 @@ void Maze::draw()
 	if (maze_.get()->at(maze_.get()->size() - 2).at(maze_.get()->at(0).size() - 2) == 'X')
 	{
 		// Зададим Зеленый цвет
-		ofSetHexColor(0xFF00FF00);
+		//ofSetHexColor(0xFF00FF00);
+		ofSetColor(0, 255, 0, alpha_);
 		// Нарисуем точку выхода
 		ofDrawRectRounded(maze_.get()->at(0).size() - 2, maze_.get()->size() - 2, 1, 1, 0.3);
 	}
@@ -93,6 +99,16 @@ void Maze::show_in_center()
 	// И сместим к центру в зависимости от масштаба
 	pos_x_ = (w - maze_.get()->at(0).size() * scale_) / 2;
 	pos_y_ = (h - maze_.get()->size() * scale_) / 2;
+}
+
+void Maze::setTransparency(int new_alpha, float delay)
+{
+	Tweener.addTween(alpha_, new_alpha, delay);
+}
+
+void Maze::setAlpha(float new_alpha)
+{
+	alpha_ = new_alpha;
 }
 
 void Maze::windowResized(int w, int h)

@@ -50,6 +50,8 @@ void ofApp::heightMazeChanged(int& height)
 void ofApp::generateMazeButtonClick()
 {
 	maze_.setup(widthMaze_, heightMaze_);
+	maze_.setAlpha(0.0f);
+	maze_.setTransparency(255, 3);
 }
 
 void ofApp::runPlayerClick()
