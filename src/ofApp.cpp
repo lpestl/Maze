@@ -1,16 +1,16 @@
 #include "ofApp.h"
-#include "ofxTweener.h"		// аддон для анимаций
+#include "ofxTweener.h"		// Р°РґРґРѕРЅ РґР»СЏ Р°РЅРёРјР°С†РёР№
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	// Подписываемся на события элементов управления
+	// РџРѕРґРїРёСЃС‹РІР°РµРјСЃСЏ РЅР° СЃРѕР±С‹С‚РёСЏ СЌР»РµРјРµРЅС‚РѕРІ СѓРїСЂР°РІР»РµРЅРёСЏ
 	widthMaze_.addListener(this, &ofApp::widthMazeChanged);
 	heightMaze_.addListener(this, &ofApp::heightMazeChanged);
 	generateMazeButton_.addListener(this, &ofApp::generateMazeButtonClick);
 	runPlayerButton_.addListener(this, &ofApp::runPlayerClick);
-	// Вызываем метод setup у панели
+	// Р’С‹Р·С‹РІР°РµРј РјРµС‚РѕРґ setup Сѓ РїР°РЅРµР»Рё
 	mazeUiPanel_.setup();
-	// И последовательно добавляем все элементы управления
+	// Р РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РґРѕР±Р°РІР»СЏРµРј РІСЃРµ СЌР»РµРјРµРЅС‚С‹ СѓРїСЂР°РІР»РµРЅРёСЏ
 	mazeUiPanel_.add(widthMaze_.setup("Width Maze", 3, 2, 100));
 	mazeUiPanel_.add(heightMaze_.setup("Height Maze", 3, 2, 100));
 	mazeUiPanel_.add(generateMazeButton_.setup("Generate Maze"));
@@ -19,7 +19,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	Tweener.update();	// обновление анимаций
+	Tweener.update();	// РѕР±РЅРѕРІР»РµРЅРёРµ Р°РЅРёРјР°С†РёР№
 	maze_.update();
 }
 
@@ -32,7 +32,7 @@ void ofApp::draw(){
 
 void ofApp::exit()
 {
-	// Отписываемся от событий
+	// РћС‚РїРёСЃС‹РІР°РµРјСЃСЏ РѕС‚ СЃРѕР±С‹С‚РёР№
 	heightMaze_.removeListener(this, &ofApp::heightMazeChanged);
 	widthMaze_.removeListener(this, &ofApp::widthMazeChanged);
 	generateMazeButton_.removeListener(this, &ofApp::generateMazeButtonClick);

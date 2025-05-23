@@ -3,68 +3,68 @@
 
 void ofPathFinder::setup(Position2D start_position, std::shared_ptr<std::vector<std::vector<char>>> maze)
 {
-	// При первоначальной инициализации удалим все ранее запущенные анимации
+	// РџСЂРё РїРµСЂРІРѕРЅР°С‡Р°Р»СЊРЅРѕР№ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СѓРґР°Р»РёРј РІСЃРµ СЂР°РЅРµРµ Р·Р°РїСѓС‰РµРЅРЅС‹Рµ Р°РЅРёРјР°С†РёРё
 	Tweener.removeAllTweens();
 	is_animated_ = false;
 	is_runed_ = false;
-	// Запустим инициализацию базового класса
+	// Р—Р°РїСѓСЃС‚РёРј РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ Р±Р°Р·РѕРІРѕРіРѕ РєР»Р°СЃСЃР°
 	init(start_position, maze);
-	// Инициализируем начальные экранные координаты
+	// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РЅР°С‡Р°Р»СЊРЅС‹Рµ СЌРєСЂР°РЅРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹
 	screen_x_ = current_position_.X;
 	screen_y_ = current_position_.Y;
 }
 
 void ofPathFinder::update()
 {
-	// Если не запущен - то ничего не делаем
+	// Р•СЃР»Рё РЅРµ Р·Р°РїСѓС‰РµРЅ - С‚Рѕ РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј
 	if (!is_runed_) return;
-	// Если запущен и уже добрался до конца - ничего не делаем
+	// Р•СЃР»Рё Р·Р°РїСѓС‰РµРЅ Рё СѓР¶Рµ РґРѕР±СЂР°Р»СЃСЏ РґРѕ РєРѕРЅС†Р° - РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј
 	if (is_win_) return;
-	// Если еще не добрался до выхода, запущен и анимирован, то делаем следующий шаг
+	// Р•СЃР»Рё РµС‰Рµ РЅРµ РґРѕР±СЂР°Р»СЃСЏ РґРѕ РІС‹С…РѕРґР°, Р·Р°РїСѓС‰РµРЅ Рё Р°РЅРёРјРёСЂРѕРІР°РЅ, С‚Рѕ РґРµР»Р°РµРј СЃР»РµРґСѓСЋС‰РёР№ С€Р°Рі
 	if (!is_animated_)
 		nextStep();
 }
 
 void ofPathFinder::draw()
 {
-	// Проверяем лабиринт
+	// РџСЂРѕРІРµСЂСЏРµРј Р»Р°Р±РёСЂРёРЅС‚
 	if (maze_ == nullptr) return;	
-	// Сначала серым закрасим все посещенные ранее ячейки
+	// РЎРЅР°С‡Р°Р»Р° СЃРµСЂС‹Рј Р·Р°РєСЂР°СЃРёРј РІСЃРµ РїРѕСЃРµС‰РµРЅРЅС‹Рµ СЂР°РЅРµРµ СЏС‡РµР№РєРё
 	ofSetHexColor(0x33555555);
 	for (auto& pos : map_)
 		ofDrawRectangle(pos.first.X, pos.first.Y, 1, 1);
-	// Теперь зеленым отметим кратчайший путь
+	// РўРµРїРµСЂСЊ Р·РµР»РµРЅС‹Рј РѕС‚РјРµС‚РёРј РєСЂР°С‚С‡Р°Р№С€РёР№ РїСѓС‚СЊ
 	ofSetHexColor(0x5500FF00);
 	for (auto& pos : short_way_)
 		ofDrawRectangle(pos.X, pos.Y, 1, 1);
-	// И красным нарисуем самого "игрока"
+	// Р РєСЂР°СЃРЅС‹Рј РЅР°СЂРёСЃСѓРµРј СЃР°РјРѕРіРѕ "РёРіСЂРѕРєР°"
 	ofSetHexColor(0x77FF0000);
 	ofDrawRectangle(screen_x_, screen_y_, 1, 1);
 }
 
 void ofPathFinder::run()
 {
-	// Запускаем игрока
+	// Р—Р°РїСѓСЃРєР°РµРј РёРіСЂРѕРєР°
 	is_runed_ = true;
 }
 
 void ofPathFinder::nextStep()
 {
-	// Запоминаем текущие координты игрока
+	// Р—Р°РїРѕРјРёРЅР°РµРј С‚РµРєСѓС‰РёРµ РєРѕРѕСЂРґРёРЅС‚С‹ РёРіСЂРѕРєР°
 	screen_x_ = current_position_.X;
 	screen_y_ = current_position_.Y;
-	// Создаем callback, который будет вызываться при окончании анимации
+	// РЎРѕР·РґР°РµРј callback, РєРѕС‚РѕСЂС‹Р№ Р±СѓРґРµС‚ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РїСЂРё РѕРєРѕРЅС‡Р°РЅРёРё Р°РЅРёРјР°С†РёРё
 	auto callback = std::bind(&ofPathFinder::endAnimation, this, std::placeholders::_1);
-	// Вызывем базовый метод для выполнения следующего шага
+	// Р’С‹Р·С‹РІРµРј Р±Р°Р·РѕРІС‹Р№ РјРµС‚РѕРґ РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ СЃР»РµРґСѓСЋС‰РµРіРѕ С€Р°РіР°
 	PathFinder::nextStep();
-	// И анимируем перемещение игрока
+	// Р Р°РЅРёРјРёСЂСѓРµРј РїРµСЂРµРјРµС‰РµРЅРёРµ РёРіСЂРѕРєР°
 	if (is_win_)
 	{
-		Tweener.addTween(screen_x_, static_cast<float>(current_position_.X), /* Длительность анимации */0.1F, &ofxTransitions::linear);
-		Tweener.addTween(screen_y_, static_cast<float>(current_position_.Y), /* Длительность анимации */0.1F, &ofxTransitions::linear);
+		Tweener.addTween(screen_x_, static_cast<float>(current_position_.X), /* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ Р°РЅРёРјР°С†РёРё */0.1F, &ofxTransitions::linear);
+		Tweener.addTween(screen_y_, static_cast<float>(current_position_.Y), /* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ Р°РЅРёРјР°С†РёРё */0.1F, &ofxTransitions::linear);
 	} else
 	{
-		Tweener.addTween(screen_x_, static_cast<float>(current_position_.X), /* Длительность анимации */0.1F, &ofxTransitions::linear, callback);
-		Tweener.addTween(screen_y_, static_cast<float>(current_position_.Y), /* Длительность анимации */0.1F, &ofxTransitions::linear, callback);
+		Tweener.addTween(screen_x_, static_cast<float>(current_position_.X), /* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ Р°РЅРёРјР°С†РёРё */0.1F, &ofxTransitions::linear, callback);
+		Tweener.addTween(screen_y_, static_cast<float>(current_position_.Y), /* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ Р°РЅРёРјР°С†РёРё */0.1F, &ofxTransitions::linear, callback);
 	}
 }
